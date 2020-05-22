@@ -34,7 +34,7 @@ public class Client {
                 out.flush();
 
                 response = in.readLine();
-                System.out.println("resposta do server " + response);
+                System.out.println(response);
             }
 
             cl_socket.shutdownOutput();
