@@ -20,6 +20,7 @@ public class ServerWorker implements Runnable{
         this.socket = socket;
         this.id = id;
         this.db = db;
+        this.user = "";
     }
 
     private void menu(BufferedReader in,PrintWriter out) throws IOException {
@@ -27,15 +28,15 @@ public class ServerWorker implements Runnable{
 
         do{
             s = in.readLine();
+            if (s == null) break; // para evitar o nullpointerException quando termina a thread
             switch (s) {
                 case "1":
-                    System.out.println("caso login");
                     username = in.readLine();
                     password = in.readLine();
 
 
                     if (db.check_login(username, password)) {
-                        user = username;
+                        this.user = username;
                         out.println("ok");
 
                     } else {
@@ -44,14 +45,13 @@ public class ServerWorker implements Runnable{
                     out.flush();
                     break;
                 case "2":
-                    System.out.println("caso registo");
                     username = in.readLine();
                     password = in.readLine();
                     region = in.readLine();
 
 
                     if (db.registerClient(username, password, region)) {
-                        user = username;
+                        this.user = username;
                         out.println("ok");
                     } else {
                         out.println("Nok");
@@ -59,7 +59,6 @@ public class ServerWorker implements Runnable{
                     out.flush();
                     break;
                 case "3":
-                    System.out.println("caso envio");
                     new_cases = in.readLine();
                     int cases = Integer.parseInt(new_cases);
                     if(db.updateCases(this.user,cases)){
@@ -72,17 +71,14 @@ public class ServerWorker implements Runnable{
                     }
                     break;
                 case "4":
-                    System.out.println("caso consulta");
                     out.println(db.getTotal_cases());
                     out.flush();
                     break;
                 case "5":
-                    System.out.println("caso consulta reg");
                     out.println(db.checkCasesByRegion(user));
                     out.flush();
                     break;
             }
-
 
         }while(!s.equals("0"));
     }
@@ -94,15 +90,15 @@ public class ServerWorker implements Runnable{
             PrintWriter out = new PrintWriter(socket.getOutputStream());
             menu(in,out);
 
-
-
-
+            socket.shutdownInput();
+            socket.shutdownOutput();
+            socket.close();
 
         }
         catch (IOException e) {
             e.printStackTrace();
         }
+
     }
-
-
 }
+
