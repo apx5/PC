@@ -23,7 +23,7 @@ public class ServerWorker implements Runnable{
         this.user = "";
     }
 
-    private void menu(BufferedReader in,PrintWriter out) throws IOException {
+    private void menu(BufferedReader in,PrintWriter out) throws IOException, InterruptedException {
         String username, password, region, s,new_cases;
 
         do{
@@ -35,7 +35,7 @@ public class ServerWorker implements Runnable{
                     password = in.readLine();
 
 
-                    if (db.check_login(username, password)) {
+                    if (db.check_login(username, password,out)) {
                         this.user = username;
                         out.println("ok");
 
@@ -50,7 +50,7 @@ public class ServerWorker implements Runnable{
                     region = in.readLine();
 
 
-                    if (db.registerClient(username, password, region)) {
+                    if (db.registerClient(username, password, region,out)) {
                         this.user = username;
                         out.println("ok");
                     } else {
@@ -64,7 +64,7 @@ public class ServerWorker implements Runnable{
                     if(db.updateCases(this.user,cases)){
                         out.println("Cases updated.");
                         out.flush();
-                        //multicast();
+                        db.multicast();
                     } else {
                         out.println("Case limit reached!");
                         out.flush();
@@ -89,13 +89,14 @@ public class ServerWorker implements Runnable{
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter out = new PrintWriter(socket.getOutputStream());
             menu(in,out);
+            db.disconnectUser(user);
 
             socket.shutdownInput();
             socket.shutdownOutput();
             socket.close();
 
         }
-        catch (IOException e) {
+        catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
 

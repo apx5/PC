@@ -5,12 +5,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Scanner;
 
 public class Client {
 
     private String host;
     private int port;
+    private BufferedReader in;
+    private PrintWriter out;
 
     public Client(String host,int port){
         this.host = host;
@@ -18,9 +21,13 @@ public class Client {
 
     }
 
-    public void menu(BufferedReader systemIn, BufferedReader in,PrintWriter out) throws IOException {
-        System.out.print("Welcome to Covid\nPlease select an option:\n1- Sign In\n2- Sign up\n");
-        String s = systemIn.readLine();
+    public void menu(BufferedReader systemIn) throws IOException {
+        System.out.print("Welcome to Covid\n");
+        String s;
+        do{
+            System.out.print("Please select an option:\n1- Sign In\n2- Sign up\n");
+            s = systemIn.readLine();
+        } while (!s.equals("1") && !s.equals("2"));
         String username, password, region,response;
         switch (s) {
             case "1":
@@ -88,7 +95,7 @@ public class Client {
 
     }
 
-    public void options(BufferedReader systemIn, BufferedReader in,PrintWriter out) throws IOException{
+    public void options(BufferedReader systemIn) throws IOException{
         String j,cases ,cases_response;
 
         do {
@@ -126,20 +133,21 @@ public class Client {
         try {
             Socket cl_socket = new Socket(host, port);
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(cl_socket.getInputStream()));
+            in = new BufferedReader(new InputStreamReader(cl_socket.getInputStream()));
 
-            PrintWriter out = new PrintWriter(cl_socket.getOutputStream());
+            out = new PrintWriter(cl_socket.getOutputStream());
 
             BufferedReader systemIn = new BufferedReader(new InputStreamReader(System.in));
 
             String userIn = null; // do teclado
             String response; // do server
-            menu(systemIn,in,out);
-            //Thread que ficará à escuta para executar sempre que houver alterações aos registos
-            //Thread listener = new Thread(new ClientListener());
-            //listener.start();
+            menu(systemIn);
 
-            options(systemIn,in,out);
+            //Thread que ficará à escuta para executar sempre que houver alterações aos registos
+            Thread listener = new Thread(new ClientListener());
+            listener.start();
+
+            options(systemIn);
 
             cl_socket.shutdownOutput();
             cl_socket.shutdownInput();
@@ -149,5 +157,20 @@ public class Client {
             e.printStackTrace();
         }
     }
+    public class ClientListener implements Runnable{
+        public void ClientListner(){}
 
+        public void run(){
+            String message;
+            try{
+                while((message = in.readLine()) != null){
+                    System.out.println(message);
+                }
+            }
+            catch (SocketException e){}
+            catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+    }
 }
