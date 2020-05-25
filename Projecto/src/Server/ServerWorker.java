@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ServerWorker implements Runnable{
 
@@ -71,7 +73,7 @@ public class ServerWorker implements Runnable{
                     }
                     break;
                 case "4":
-                    out.println(db.getTotal_cases());
+                    out.println(db.getAverage());
                     out.flush();
                     break;
                 case "5":

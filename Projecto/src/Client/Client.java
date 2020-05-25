@@ -22,7 +22,8 @@ public class Client {
     }
 
     public void menu(BufferedReader systemIn) throws IOException {
-        System.out.print("Welcome to Covid\n");
+        int counter = 0;
+        System.out.print("Welcome to SARS-CoV-2 Survey\n");
         String s;
         do{
             System.out.print("Please select an option:\n1- Sign In\n2- Sign up\n");
@@ -42,10 +43,11 @@ public class Client {
                 out.println(password);
                 out.flush();
 
-                while((response= in.readLine()) != null && !response.equals("ok")){
+                while((response= in.readLine()) != null && !response.equals("ok") && counter < 3){
                     out.println("1");
                     out.flush();
                     System.out.println("Invalid username or password");
+                    counter++;
                     System.out.println("Enter your username: ");
                     username = systemIn.readLine();
                     out.println(username);
@@ -55,7 +57,11 @@ public class Client {
                     out.println(password);
                     out.flush();
                 }
-                System.out.println("Login successfull!");
+                if (counter==3){
+                    menu(systemIn);
+                    break;
+                }
+                else System.out.println("Login successfull!");
                 break;
             case "2":
                 out.println("2");
@@ -164,6 +170,7 @@ public class Client {
             String message;
             try{
                 while((message = in.readLine()) != null){
+                    System.out.println("teste");
                     System.out.println(message);
                 }
             }
