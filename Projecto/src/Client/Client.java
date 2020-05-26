@@ -25,29 +25,15 @@ public class Client {
         int counter = 0;
         System.out.print("Welcome to SARS-CoV-2 Survey\n");
         String s;
+        String username, password, region,response="Nok";
         do{
             System.out.print("Please select an option:\n1- Sign In\n2- Sign up\n");
             s = systemIn.readLine();
-        } while (!s.equals("1") && !s.equals("2"));
-        String username, password, region,response;
-        switch (s) {
-            case "1":
-                out.println("1");
-                out.flush();
-                System.out.println("Enter your username: ");
-                username = systemIn.readLine();
-                out.println(username);
-                out.flush();
-                System.out.println("Enter your password: ");
-                password = systemIn.readLine();
-                out.println(password);
-                out.flush();
 
-                while((response= in.readLine()) != null && !response.equals("ok") && counter < 3){
+            switch (s) {
+                case "1":
                     out.println("1");
                     out.flush();
-                    System.out.println("Invalid username or password");
-                    counter++;
                     System.out.println("Enter your username: ");
                     username = systemIn.readLine();
                     out.println(username);
@@ -56,32 +42,17 @@ public class Client {
                     password = systemIn.readLine();
                     out.println(password);
                     out.flush();
-                }
-                if (counter==3){
-                    menu(systemIn);
+
+                    if ((response= in.readLine()) != null && response.equals("ok")) {
+                        System.out.println("Login successfull!");
+                    }
+                    else {
+                        System.out.println("Invalid username or password");
+                    }
                     break;
-                }
-                else System.out.println("Login successfull!");
-                break;
-            case "2":
-                out.println("2");
-                out.flush();
-                System.out.println("Enter your username: ");
-                username = systemIn.readLine();
-                out.println(username);
-                out.flush();
-                System.out.println("Enter your password: ");
-                password = systemIn.readLine();
-                out.println(password);
-                out.flush();
-                System.out.println("Enter your region: ");
-                region = systemIn.readLine();
-                out.println(region);
-                out.flush();
-                while((response= in.readLine()) != null && !response.equals("ok")){
+                case "2":
                     out.println("2");
                     out.flush();
-                    System.out.println("Username already exists");
                     System.out.println("Enter your username: ");
                     username = systemIn.readLine();
                     out.println(username);
@@ -94,11 +65,16 @@ public class Client {
                     region = systemIn.readLine();
                     out.println(region);
                     out.flush();
-                }
-                System.out.println("Register successfull!");
-                break;
-        }
 
+                    if ((response= in.readLine()) != null && response.equals("ok")) {
+                        System.out.println("Register successfull!");
+                    }
+                    else {
+                        System.out.println("Username already exists");
+                    }
+                    break;
+            }
+        } while ((!s.equals("1") && !s.equals("2")) || !response.equals("ok"));
     }
 
     public void options(BufferedReader systemIn) throws IOException{
@@ -108,6 +84,9 @@ public class Client {
             System.out.print("Choose an option:\n1-Send new cases\n2-Check total cases\n3-Check cases in your region\n0-Exit\n");
             j = systemIn.readLine();
             switch (j) {
+                case "0":
+                    out.println("0");
+                    break;
                 case "1":
                     System.out.println("Enter the new cases:");
                     cases = systemIn.readLine();
@@ -122,14 +101,14 @@ public class Client {
                 case "2":
                     out.println("4");
                     out.flush();
-                    cases_response = in.readLine();
-                    System.out.println(cases_response + " total cases.");
+                    //cases_response = in.readLine();
+                    //System.out.println(cases_response + " total cases.");
                     break;
                 case "3":
                     out.println("5");
                     out.flush();
-                    cases_response = in.readLine();
-                    System.out.println(cases_response + " total cases in your region.");
+                    //cases_response = in.readLine();
+                    //System.out.println(cases_response + " total cases in your region.");
                     break;
             }
         }while (!j.equals("0"));
@@ -170,7 +149,6 @@ public class Client {
             String message;
             try{
                 while((message = in.readLine()) != null){
-                    System.out.println("teste");
                     System.out.println(message);
                 }
             }

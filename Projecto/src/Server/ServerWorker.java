@@ -36,7 +36,6 @@ public class ServerWorker implements Runnable{
                     username = in.readLine();
                     password = in.readLine();
 
-
                     if (db.check_login(username, password,out)) {
                         this.user = username;
                         out.println("ok");
@@ -50,7 +49,6 @@ public class ServerWorker implements Runnable{
                     username = in.readLine();
                     password = in.readLine();
                     region = in.readLine();
-
 
                     if (db.registerClient(username, password, region,out)) {
                         this.user = username;
