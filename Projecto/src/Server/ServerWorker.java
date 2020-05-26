@@ -7,23 +7,27 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class ServerWorker implements Runnable{
 
     private Socket socket;
-    private int id;
     private DataBase db;
     private String user;
+    private Thread t;
 
 
-    public ServerWorker(Socket socket,DataBase db, int id){
+    public ServerWorker(Socket socket,DataBase db){
         this.socket = socket;
-        this.id = id;
         this.db = db;
         this.user = "";
+        this.t = null;
     }
+
 
     private void menu(BufferedReader in,PrintWriter out) throws IOException, InterruptedException {
         String username, password, region, s,new_cases;
@@ -39,7 +43,8 @@ public class ServerWorker implements Runnable{
                     if (db.check_login(username, password,out)) {
                         this.user = username;
                         out.println("ok");
-
+                        t = new Thread(new Multicast(out,db));
+                        t.start();
                     } else {
                         out.println("Nok");
                     }
@@ -49,10 +54,11 @@ public class ServerWorker implements Runnable{
                     username = in.readLine();
                     password = in.readLine();
                     region = in.readLine();
-
                     if (db.registerClient(username, password, region,out)) {
                         this.user = username;
                         out.println("ok");
+                        t = new Thread(new Multicast(out,db));
+                        t.start();
                     } else {
                         out.println("Nok");
                     }
@@ -64,18 +70,21 @@ public class ServerWorker implements Runnable{
                     if(db.updateCases(this.user,cases)){
                         out.println("Cases updated.");
                         out.flush();
-                        db.multicast();
+                        db.lock.lock();
+                        db.msgCounter++;
+                        db.multicast_wait.signalAll();
+                        db.lock.unlock();
                     } else {
                         out.println("Case limit reached!");
                         out.flush();
                     }
                     break;
                 case "4":
-                    out.println(db.getAverage());
+                    out.println(db.getAverage() + " average.");
                     out.flush();
                     break;
                 case "5":
-                    out.println(db.checkCasesByRegion(user));
+                    out.println(db.checkCasesByRegion(user) + " cases in your region.");
                     out.flush();
                     break;
             }
@@ -89,7 +98,6 @@ public class ServerWorker implements Runnable{
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter out = new PrintWriter(socket.getOutputStream());
             menu(in,out);
-            db.disconnectUser(user);
 
             socket.shutdownInput();
             socket.shutdownOutput();

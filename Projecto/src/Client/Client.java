@@ -81,7 +81,7 @@ public class Client {
         String j,cases ,cases_response;
 
         do {
-            System.out.print("Choose an option:\n1-Send new cases\n2-Check total cases\n3-Check cases in your region\n0-Exit\n");
+            System.out.print("Choose an option:\n1-Send new cases\n2-Check average\n3-Check cases in your region\n0-Exit\n");
             j = systemIn.readLine();
             switch (j) {
                 case "0":
@@ -94,21 +94,18 @@ public class Client {
                     out.flush();
                     out.println(cases);
                     out.flush();
-                    String i = in.readLine();
-                    System.out.println(i);
+                    //String i = in.readLine();
+                    //System.out.println(i);
                     break;
                     //como a seguir todos vao receber a nova notificação, não há necessidade de ficar à espera de resposta do server
                 case "2":
                     out.println("4");
                     out.flush();
-                    //cases_response = in.readLine();
-                    //System.out.println(cases_response + " total cases.");
+
                     break;
                 case "3":
                     out.println("5");
                     out.flush();
-                    //cases_response = in.readLine();
-                    //System.out.println(cases_response + " total cases in your region.");
                     break;
             }
         }while (!j.equals("0"));

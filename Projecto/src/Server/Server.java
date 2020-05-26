@@ -3,6 +3,7 @@ package Server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.locks.Condition;
 
 public class Server {
 
@@ -16,13 +17,11 @@ public class Server {
     }
 
     public void startServer(){
-        int workerCounter = 1;
         try{
              this.serverSocket = new ServerSocket(this.port);
             while(true){
                 Socket cl_socket = serverSocket.accept();
-                System.out.println("accepted " + workerCounter + ";");
-                new Thread(new ServerWorker(cl_socket,db,workerCounter++)).start();
+                new Thread(new ServerWorker(cl_socket,db)).start();
             }
         } catch (IOException e) {
             e.printStackTrace();
