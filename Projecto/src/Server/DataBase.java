@@ -15,6 +15,7 @@ public class DataBase {
     ReentrantLock lock_clientCases;
     ReentrantLock lock_clientRegisters;
     ReadWriteLock rwLock;
+    ReentrantLock lock;
     public int msgCounter;
     Condition multicast_wait;
 
@@ -25,7 +26,8 @@ public class DataBase {
         this.lock_clientCases = new ReentrantLock();
         this.lock_clientRegisters = new ReentrantLock();
         this.msgCounter = 0;
-        this.multicast_wait = lock_clientRegisters.newCondition();
+        this.lock = new ReentrantLock();
+        this.multicast_wait = lock.newCondition();
         this.rwLock = new ReentrantReadWriteLock();
     }
 
@@ -34,18 +36,18 @@ public class DataBase {
     }
 
     public boolean registerClient(String user, String pass, String region,PrintWriter out) throws InterruptedException {
-        Lock l = rwLock.writeLock();
+        lock_clientRegisters.lock();
         for (InfoClient c : client_registers) {
             if (c.getUsername().equals(user)) {
-                l.unlock();
+                lock_clientRegisters.unlock();
                 return false;
             }
         }
         InfoClient cl = new InfoClient(user, pass, region);
         client_registers.add(cl);
         //talvez nao seja necessário bloquear os case_registers
-        l.unlock();
         case_registers.put(user, 0);
+        lock_clientRegisters.unlock();
         return true;
     }
 
@@ -68,14 +70,16 @@ public class DataBase {
                 region = c.getRegion();
             }
         }
-        client_registers.lock(); //temos de bloquear tudo para garantir que nao entram novos registos enquanto percorre o array
+        lock_clientRegisters.lock(); //temos de bloquear tudo para garantir que nao entram novos registos enquanto percorre o array
+        lock_clientCases.lock();
         for(InfoClient c : client_registers){
             if(c.getRegion().equals(region)){
                 user = c.getUsername();
                 ret+= case_registers.get(user);
             }
         }
-        lock.unlock();
+        lock_clientRegisters.unlock();
+        lock_clientCases.unlock();
         return ret;
     }
 

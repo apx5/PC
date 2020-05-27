@@ -27,7 +27,7 @@ public class Multicast implements Runnable{
                     e.printStackTrace();
                 }
             }
-            pw.println(db.getAverage() + " average cases.");
+            pw.println("Average has been updated to " + db.getAverage() + ".");
             pw.flush();
             counter = db.msgCounter;
         }
