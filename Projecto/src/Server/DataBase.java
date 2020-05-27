@@ -3,12 +3,13 @@ package Server;
 import Exceptions.UserTakenException;
 
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.*;
 
-public class DataBase {
+public class DataBase implements Serializable {
     private ArrayList<InfoClient> client_registers;
     private HashMap<String, Integer> case_registers;
     private int total_cases;
@@ -31,9 +32,9 @@ public class DataBase {
         this.rwLock = new ReentrantReadWriteLock();
     }
 
-    public float getAverage() {
+    public synchronized float getAverage() {
         return total_cases/(float)(150*client_registers.size());
-    }
+    }//?????
 
     public boolean registerClient(String user, String pass, String region,PrintWriter out) throws InterruptedException {
         lock_clientRegisters.lock();

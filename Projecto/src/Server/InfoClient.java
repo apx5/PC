@@ -1,6 +1,8 @@
 package Server;
 
-public class InfoClient {
+import java.io.Serializable;
+
+public class InfoClient implements Serializable {
 
     private String username;
     private String password;
