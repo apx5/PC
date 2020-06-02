@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.Scanner;
 
 public class Client {
 
@@ -94,10 +93,7 @@ public class Client {
                     out.flush();
                     out.println(cases);
                     out.flush();
-                    //String i = in.readLine();
-                    //System.out.println(i);
                     break;
-                    //como a seguir todos vao receber a nova notificação, não há necessidade de ficar à espera de resposta do server
                 case "2":
                     out.println("4");
                     out.flush();
@@ -140,7 +136,7 @@ public class Client {
         }
     }
     public class ClientListener implements Runnable{
-        public void ClientListner(){}
+        public void ClientListener(){}
 
         public void run(){
             String message;

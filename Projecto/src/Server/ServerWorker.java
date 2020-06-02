@@ -1,16 +1,10 @@
 package Server;
 
-import Exceptions.UserTakenException;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class ServerWorker implements Runnable{
@@ -19,6 +13,8 @@ public class ServerWorker implements Runnable{
     private DataBase db;
     private String user;
     private Thread t;
+    private ReentrantLock lock;
+    private PrintWriter out;
 
 
     public ServerWorker(Socket socket,DataBase db){
@@ -26,6 +22,7 @@ public class ServerWorker implements Runnable{
         this.db = db;
         this.user = "";
         this.t = null;
+        this.lock = new ReentrantLock();
     }
 
 
@@ -42,11 +39,15 @@ public class ServerWorker implements Runnable{
 
                     if (db.check_login(username, password,out)) {
                         this.user = username;
+                        lock.lock();
                         out.println("ok");
-                        t = new Thread(new Multicast(out,db));
+                        lock.unlock();
+                        t = new Thread(new Multicast());
                         t.start();
                     } else {
+                        lock.lock();
                         out.println("Nok");
+                        lock.unlock();
                     }
                     out.flush();
                     break;
@@ -56,11 +57,15 @@ public class ServerWorker implements Runnable{
                     region = in.readLine();
                     if (db.registerClient(username, password, region,out)) {
                         this.user = username;
+                        lock.lock();
                         out.println("ok");
-                        t = new Thread(new Multicast(out,db));
+                        lock.unlock();
+                        t = new Thread(new Multicast());
                         t.start();
                     } else {
+                        lock.lock();
                         out.println("Nok");
+                        lock.unlock();
                     }
                     out.flush();
                     break;
@@ -68,24 +73,32 @@ public class ServerWorker implements Runnable{
                     new_cases = in.readLine();
                     int cases = Integer.parseInt(new_cases);
                     if(db.updateCases(this.user,cases)){
+                        lock.lock();
                         out.println("Cases updated.");
                         out.flush();
+                        lock.unlock();
                         db.lock.lock();
                         db.msgCounter++;
                         db.multicast_wait.signalAll();
                         db.lock.unlock();
                     } else {
+                        lock.lock();
                         out.println("Case limit reached!");
                         out.flush();
+                        lock.unlock();
                     }
                     break;
                 case "4":
+                    lock.lock();
                     out.println(db.getAverage() + " average.");
                     out.flush();
+                    lock.unlock();
                     break;
                 case "5":
+                    lock.lock();
                     out.println(db.checkCasesByRegion(user) + " cases in your region.");
                     out.flush();
+                    lock.unlock();
                     break;
             }
 
@@ -96,7 +109,7 @@ public class ServerWorker implements Runnable{
     public void run(){
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            PrintWriter out = new PrintWriter(socket.getOutputStream());
+            out = new PrintWriter(socket.getOutputStream());
             menu(in,out);
 
             socket.shutdownInput();
@@ -108,6 +121,34 @@ public class ServerWorker implements Runnable{
             e.printStackTrace();
         }
 
+    }
+
+    public class Multicast implements Runnable { // criada para controlar a escrita por duas threads no mesmo PrintWritter do cliente
+        private int counter;
+
+        public Multicast() {
+            this.counter = db.msgCounter;
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                while (counter == db.msgCounter) {
+                    try {
+                        db.lock.lock();
+                        db.multicast_wait.await();
+                        db.lock.unlock();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                lock.lock();
+                out.println("Average has been updated to " + db.getAverage() + ".");
+                out.flush();
+                counter = db.msgCounter;
+                lock.unlock();
+            }
+        }
     }
 }
 

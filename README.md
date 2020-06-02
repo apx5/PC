@@ -8,7 +8,7 @@
         [x] - Quando o cliente manda novos dados temos de bloquear o hashmap dos registos de dados, adicionar o novo valor para aquele user(valor += (novo-actual)) (não precisa de bloquear na consulta do valor actual) , e enviar os novos dados a todos os outros clientes
     [x] - Se houver tempo fazer a estimativa por zonas do país(criação de classe User com username, password, zona(norte, centro, sul)
     [x] - Como vamos organizar o servidor para trabalhar com threads? (o prof tinha falado em ter duas threads por cliente, não percebi bem porquê)
-    [ ] - Extremo de escrita do server para o cliente nao é thread safe. Temos 2 threads a escrever no mesmo extremo de escrita do cliente
+    [x] - Extremo de escrita do server para o cliente nao é thread safe. Temos 2 threads a escrever no mesmo extremo de escrita do cliente
 
 
 

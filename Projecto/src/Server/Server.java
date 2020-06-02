@@ -25,6 +25,7 @@ public class Server {
 
     public void startServer(){
         try{
+            System.out.println("The server is ready to accept connections!");
              this.serverSocket = new ServerSocket(this.port);
              Thread t = new Thread(new ServerListener());
              t.start();

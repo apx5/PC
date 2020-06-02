@@ -1,12 +1,9 @@
 package Server;
 
-import Exceptions.UserTakenException;
-
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.*;
 
 public class DataBase implements Serializable {
@@ -15,7 +12,6 @@ public class DataBase implements Serializable {
     private int total_cases;
     ReentrantLock lock_clientCases;
     ReentrantLock lock_clientRegisters;
-    ReadWriteLock rwLock;
     ReentrantLock lock;
     public int msgCounter;
     Condition multicast_wait;
@@ -29,7 +25,6 @@ public class DataBase implements Serializable {
         this.msgCounter = 0;
         this.lock = new ReentrantLock();
         this.multicast_wait = lock.newCondition();
-        this.rwLock = new ReentrantReadWriteLock();
     }
 
     public synchronized float getAverage() {
@@ -46,7 +41,7 @@ public class DataBase implements Serializable {
         }
         InfoClient cl = new InfoClient(user, pass, region);
         client_registers.add(cl);
-        //talvez nao seja necessário bloquear os case_registers
+        //talvez nao seja necessário bloquear os case_registers(fica a dúvida)
         case_registers.put(user, 0);
         lock_clientRegisters.unlock();
         return true;
@@ -55,7 +50,7 @@ public class DataBase implements Serializable {
     public boolean updateCases(String user, int x) { // Precisa de ser revista a concorrência
         int c = case_registers.get(user);
         if(x+c <= 150) {
-            lock_clientRegisters.lock();//?????
+            lock_clientRegisters.lock();
             case_registers.put(user, x + c);
             total_cases += x;
             lock_clientRegisters.unlock();
@@ -84,7 +79,7 @@ public class DataBase implements Serializable {
         return ret;
     }
 
-    public boolean check_login(String user, String pass,PrintWriter out) {
+    public boolean check_login(String user, String pass,PrintWriter out) { //só leitura nao precisa de lock
         InfoClient client;
         if(client_registers.size() > 0) {
             for (InfoClient cl : client_registers) {
